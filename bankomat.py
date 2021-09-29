@@ -10,7 +10,7 @@ def mainMeny():
     print('2. Administrera konto')
     print('3. Avsluta')
 
-# Skapar nytt konto ifall det inte finns i listan alreadyExistingAccount
+# Skapar nytt konto ifall det inte redan finns en fil av samma kontonummer eller om det finns i dictionary
 
 
 def createAccount(accountDictionary):
@@ -21,27 +21,50 @@ def createAccount(accountDictionary):
         f.read()
         f.close()
         print('\nKontot finns redan\n')
-    
+
     except:
 
         if account.isdigit() and account not in accountDictionary:
             accountDictionary[account] = 0
             print('\nKontot tillagt\n')
-            f = open(f'{account}.txt', 'w')
-            f.write(
+            #Transaktions fil
+            f_create = open(f'{account}.txt', 'w')
+            f_create.write(
                 f'{time.strftime("%x") + " " + time.strftime("%X")} - Account created.\n')
-            f.close()
+            f_create.close()
+            #Saldo fil
+            f_saldo = open(f'{account}Saldo.txt', 'w')
+            f_saldo.write(f'{accountDictionary[account]}')
+            f_saldo.close()
     
         else:
             print('\nEndast siffror!\n')
-        
+
+#Kollar så att kontofilerna finns tidigare        
+def accountExists(logIn):
+    try:
+        #Kollar så det finns ett konto
+        f = open(f'{logIn}.txt', 'r')
+        f.read()
+        f.close()
+        # Återställer saldo
+        f_saldo = open(f'{logIn}Saldo.txt', 'r')
+        accountDictionary[logIn] = int(f_saldo.read())
+        f_saldo.close()
+        #Öppnar menyn
+        return True
+
+    except:
+        return False
 
 
 # Loggar in på angivna kontot ifall det finns i alreadyExistingAccount
 def logInAccount(accountDictionary):
 
     logIn = input('Ange kontonummer->')
-    if logIn in accountDictionary:
+    #Funktion som returnerar True om kontot finns
+    existingAccount = accountExists(logIn)
+    if existingAccount:
         accountMeny(logIn, accountDictionary)
     else:
         print('\nKontot finns inte..\n')
@@ -55,10 +78,15 @@ def moneyTakeOut(bankAccount, accountDictionary):
         if int(amount) <= accountDictionary[bankAccount]:
             print(f'\nTar ut {amount}kr')
             accountDictionary[bankAccount] -= int(amount)
-            #kvitto = open(f'{bankAccount}.txt', 'a')
-            #kvitto.write(
-            #    f'{time.strftime("%x") + " " + time.strftime("%X")} - utdrag : {amount}kr\n')
-            #kvitto.close()
+            #Fyller på transaktion
+            f_withdraw = open(f'{bankAccount}.txt', 'a')
+            f_withdraw.write(
+                f'{time.strftime("%x") + " " + time.strftime("%X")} - utdrag : {amount}kr\n')
+            f_withdraw.close()
+            #Saldo fil
+            f_saldo = open(f'{bankAccount}Saldo.txt', 'w')
+            f_saldo.write(f'{accountDictionary[bankAccount]}')
+            f_saldo.close()
         else:
             print(
                 f'\nBelopp finns inte att ta ut, saldo är: {accountDictionary[bankAccount]}kr ')
@@ -74,10 +102,15 @@ def moneyPutIn(bankAccount, accountDictionary):
     if amount.isdigit() and int(amount) > 0:
         print(f'\nSätter in {amount}kr')
         accountDictionary[bankAccount] += int(amount)
-        #kvitto = open(f'{BankAccount}.txt', 'a')
-        #kvitto.write(
-        #    f'{time.strftime("%x") + " " + time.strftime("%X")} - insättning : {belopp}kr\n')
-        #kvitto.close()
+        #Fyller på transaktion
+        f_deposit = open(f'{bankAccount}.txt', 'a')
+        f_deposit.write(
+            f'{time.strftime("%x") + " " + time.strftime("%X")} - insättning : {amount}kr\n')
+        f_deposit.close()
+        #Saldo fil
+        f_saldo = open(f'{bankAccount}Saldo.txt', 'w')
+        f_saldo.write(f'{accountDictionary[bankAccount]}')
+        f_saldo.close()
     elif amount[0] == "-":
         print("Tar inte emot negativa belopp")
     else:
@@ -87,10 +120,11 @@ def moneyPutIn(bankAccount, accountDictionary):
 
 
 def moneySaldo(bankAccount, accountDictionary):
-    #kvitto = open(f'{BankAccount}.txt', 'r')
-    #print('\nTidigare transaktioner:')
-    #print(kvitto.read())
-    #kvitto.close()
+    
+    f_transactions = open(f'{bankAccount}.txt', 'r')
+    print('\nTidigare transaktioner:')
+    print(f_transactions.read())
+    f_transactions.close()
     print(f'\nDitt saldo är : {accountDictionary[bankAccount]}kr \n')
 
 
