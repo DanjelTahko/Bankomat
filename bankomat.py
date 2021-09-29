@@ -13,15 +13,14 @@ def mainMeny():
 # Skapar nytt konto ifall det inte finns i listan alreadyExistingAccount
 
 
-def createAccount():
+def createAccount(accountDictionary):
 
     account = input('Ange kontonummer->')
 
     if account.isdigit():
 
-        if account not in alreadyExistingAccount:
-            alreadyExistingAccount.append(account)
-            moneyOnAccount.append(0)
+        if account not in accountDictionary:
+            accountDictionary[account] = 0
             print('\nKontot tillagt\n')
         else:
             print('\nKontot finns redan\n')
@@ -31,31 +30,30 @@ def createAccount():
 
 
 # Loggar in på angivna kontot ifall det finns i alreadyExistingAccount
-def logInAccount():
+def logInAccount(accountDictionary):
 
     logIn = input('Ange kontonummer->')
-    if logIn in alreadyExistingAccount:
-        accountMeny(logIn)
+    if logIn in accountDictionary:
+        accountMeny(logIn, accountDictionary)
     else:
         print('\nKontot finns inte..\n')
 
 # Tar ut pengar från alreadyExistingAccount ifall kontot har det beloppet & skapar/lägger till i kvitto dokumentet
 
 
-def moneyTakeOut(BankAccount):
-    index = alreadyExistingAccount.index(BankAccount)
-    belopp = input('Ange belopp att ta ut->')
-    if belopp.isdigit() and int(belopp) > 0:
-        if int(belopp) <= moneyOnAccount[index]:
-            print(f'\nTar ut {belopp}kr')
-            moneyOnAccount[index] -= int(belopp)
-            kvitto = open(f'{BankAccount}.txt', 'a')
-            kvitto.write(
-                f'{time.strftime("%x") + " " + time.strftime("%X")} - utdrag : {belopp}kr\n')
-            kvitto.close()
+def moneyTakeOut(bankAccount, accountDictionary):
+    amount = input('Ange belopp att ta ut->')
+    if amount.isdigit() and int(amount) > 0:
+        if int(amount) <= accountDictionary[bankAccount]:
+            print(f'\nTar ut {amount}kr')
+            accountDictionary[bankAccount] -= int(amount)
+            #kvitto = open(f'{bankAccount}.txt', 'a')
+            #kvitto.write(
+            #    f'{time.strftime("%x") + " " + time.strftime("%X")} - utdrag : {amount}kr\n')
+            #kvitto.close()
         else:
             print(
-                f'\nBelopp finns inte att ta ut, saldo är: {moneyOnAccount[index]}kr ')
+                f'\nBelopp finns inte att ta ut, saldo är: {accountDictionary[bankAccount]}kr ')
 
     else:
         print('\nEndast siffror!\n')
@@ -63,37 +61,36 @@ def moneyTakeOut(BankAccount):
 # Sätter in pengar i moneyOnAccount som har samma index som alreadyExistingAccount & skapar/lägger till i kvitto dokumentet
 
 
-def moneyPutIn(BankAccount):
-    index = alreadyExistingAccount.index(BankAccount)
-    belopp = input('Ange belopp att sätta in->')
-    if belopp.isdigit() and int(belopp) > 0:
-        print(f'\nSätter in {belopp}kr')
-        moneyOnAccount[index] += int(belopp)
-        kvitto = open(f'{BankAccount}.txt', 'a')
-        kvitto.write(
-            f'{time.strftime("%x") + " " + time.strftime("%X")} - insättning : {belopp}kr\n')
-        kvitto.close()
-
+def moneyPutIn(BankAccount, accountDictionary):
+    amount = input('Ange belopp att sätta in->')
+    if amount.isdigit() and int(amount) > 0:
+        print(f'\nSätter in {amount}kr')
+        accountDictionary[BankAccount] += int(amount)
+        #kvitto = open(f'{BankAccount}.txt', 'a')
+        #kvitto.write(
+        #    f'{time.strftime("%x") + " " + time.strftime("%X")} - insättning : {belopp}kr\n')
+        #kvitto.close()
+    elif amount[0] == "-":
+        print("Tar inte emot negativa belopp")
     else:
         print('Endast siffror!')
 
 # Läser kvittodokumentet som tillhör angivna kontonummer & visar nuvarande saldo
 
 
-def moneySaldo(BankAccount):
-    index = alreadyExistingAccount.index(BankAccount)
-    kvitto = open(f'{BankAccount}.txt', 'r')
-    print('\nTidigare transaktioner:')
-    print(kvitto.read())
-    kvitto.close()
-    print(f'\nDitt saldo är : {moneyOnAccount[index]}kr \n')
+def moneySaldo(BankAccount, accountDictionary):
+    #kvitto = open(f'{BankAccount}.txt', 'r')
+    #print('\nTidigare transaktioner:')
+    #print(kvitto.read())
+    #kvitto.close()
+    print(f'\nDitt saldo är : {accountDictionary[BankAccount]}kr \n')
 
 
 # Kontomeny loop
-def accountMeny(logIn):
+def accountMeny(bankAccount, accountDictionary):
     loop = True
     while loop:
-        print(f'\n------KONTOMENY------| konto:{logIn}')
+        print(f'\n------KONTOMENY------| konto:{bankAccount}')
         print('1. Ta ut pengar')
         print('2. Sätt in pengar')
         print('3. Visa saldo')
@@ -101,11 +98,11 @@ def accountMeny(logIn):
         changeAlt = input('Ange menyval->')
         if changeAlt.isdigit():
             if int(changeAlt) == 1:
-                moneyTakeOut(logIn)
+                moneyTakeOut(bankAccount, accountDictionary)
             elif int(changeAlt) == 2:
-                moneyPutIn(logIn)
+                moneyPutIn(bankAccount, accountDictionary)
             elif int(changeAlt) == 3:
-                moneySaldo(logIn)
+                moneySaldo(bankAccount, accountDictionary)
             elif int(changeAlt) == 4:
                 loop = False
             else:
@@ -116,8 +113,8 @@ def accountMeny(logIn):
 
 
 # Huvudmeny loop
-alreadyExistingAccount = []
-moneyOnAccount = []
+
+accountDictionary = {}
 time = datetime.datetime.now()
 active = True
 while active:
@@ -125,9 +122,9 @@ while active:
     choise = input('Ange menyval->')
     if choise.isdigit():
         if int(choise) == 1:
-            createAccount()
+            createAccount(accountDictionary)
         elif int(choise) == 2:
-            logInAccount()
+            logInAccount(accountDictionary)
         elif int(choise) == 3:
             active = False
         else:
@@ -135,9 +132,4 @@ while active:
     else:
         print('\nEndast siffror\n')
 
-"""Det som inte funkar är ifall man stänger ner programet
-och startar upp det igen och skapar samma banknummer en gång till.
-saldot/kvittot kommer visa tidigare utdrag/insättningar men programmet
-skapar ett nytt konto men inga pengar i.
- - MEN jag tänker att skulle det vara en riktig bankomat så skulle man inte 
-stänga av den? dock dålig säkerhet ifall tex strömavbrott skulle inträffa.."""
+#Ändra till dictionary istället för två listor
