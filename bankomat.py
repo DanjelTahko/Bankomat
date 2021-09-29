@@ -16,17 +16,25 @@ def mainMeny():
 def createAccount(accountDictionary):
 
     account = input('Ange kontonummer->')
+    try:
+        f = open(f'{account}.txt', 'r')
+        f.read()
+        f.close()
+        print('\nKontot finns redan\n')
+    
+    except:
 
-    if account.isdigit():
-
-        if account not in accountDictionary:
+        if account.isdigit() and account not in accountDictionary:
             accountDictionary[account] = 0
             print('\nKontot tillagt\n')
+            f = open(f'{account}.txt', 'w')
+            f.write(
+                f'{time.strftime("%x") + " " + time.strftime("%X")} - Account created.\n')
+            f.close()
+    
         else:
-            print('\nKontot finns redan\n')
-
-    else:
-        print('\nEndast siffror!\n')
+            print('\nEndast siffror!\n')
+        
 
 
 # Loggar in på angivna kontot ifall det finns i alreadyExistingAccount
@@ -61,11 +69,11 @@ def moneyTakeOut(bankAccount, accountDictionary):
 # Sätter in pengar i moneyOnAccount som har samma index som alreadyExistingAccount & skapar/lägger till i kvitto dokumentet
 
 
-def moneyPutIn(BankAccount, accountDictionary):
+def moneyPutIn(bankAccount, accountDictionary):
     amount = input('Ange belopp att sätta in->')
     if amount.isdigit() and int(amount) > 0:
         print(f'\nSätter in {amount}kr')
-        accountDictionary[BankAccount] += int(amount)
+        accountDictionary[bankAccount] += int(amount)
         #kvitto = open(f'{BankAccount}.txt', 'a')
         #kvitto.write(
         #    f'{time.strftime("%x") + " " + time.strftime("%X")} - insättning : {belopp}kr\n')
@@ -78,12 +86,12 @@ def moneyPutIn(BankAccount, accountDictionary):
 # Läser kvittodokumentet som tillhör angivna kontonummer & visar nuvarande saldo
 
 
-def moneySaldo(BankAccount, accountDictionary):
+def moneySaldo(bankAccount, accountDictionary):
     #kvitto = open(f'{BankAccount}.txt', 'r')
     #print('\nTidigare transaktioner:')
     #print(kvitto.read())
     #kvitto.close()
-    print(f'\nDitt saldo är : {accountDictionary[BankAccount]}kr \n')
+    print(f'\nDitt saldo är : {accountDictionary[bankAccount]}kr \n')
 
 
 # Kontomeny loop
@@ -132,4 +140,4 @@ while active:
     else:
         print('\nEndast siffror\n')
 
-#Ändra till dictionary istället för två listor
+
